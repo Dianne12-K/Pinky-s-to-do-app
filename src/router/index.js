@@ -50,17 +50,18 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-    // Import inside the guard so Pinia is guaranteed to be initialised
     const { useAuthStore } = await import('@/stores/auth')
     const auth = useAuthStore()
 
+    // Check token in localStorage directly - store may not be hydrated yet
+    const hasToken = !!localStorage.getItem('token')
+
     if (to.meta.requiresAuth) {
-        if (!auth.isLoggedIn) return next('/login')
-        if (!auth.user) await auth.fetchUser()
+        if (!hasToken) return next('/login')
         return next()
     }
 
-    if (to.meta.guest && auth.isLoggedIn) return next('/')
+    if (to.meta.guest && hasToken) return next('/')
 
     next()
 })
