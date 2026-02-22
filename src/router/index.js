@@ -18,26 +18,10 @@ const routes = [
         component: () => import('@/layouts/AppLayout.vue'),
         meta: { requiresAuth: true },
         children: [
-            {
-                path: '',
-                name: 'Dashboard',
-                component: () => import('@/views/DashboardView.vue'),
-            },
-            {
-                path: 'tasks',
-                name: 'Tasks',
-                component: () => import('@/views/TasksView.vue'),
-            },
-            {
-                path: 'reminders',
-                name: 'Reminders',
-                component: () => import('@/views/RemindersView.vue'),
-            },
-            {
-                path: 'notes',
-                name: 'Notes',
-                component: () => import('@/views/NotesView.vue'),
-            },
+            { path: '',         name: 'Dashboard', component: () => import('@/views/DashboardView.vue') },
+            { path: 'tasks',    name: 'Tasks',     component: () => import('@/views/TasksView.vue') },
+            { path: 'reminders',name: 'Reminders', component: () => import('@/views/RemindersView.vue') },
+            { path: 'notes',    name: 'Notes',     component: () => import('@/views/NotesView.vue') },
         ]
     },
     { path: '/:pathMatch(.*)*', redirect: '/' }
@@ -49,19 +33,12 @@ const router = createRouter({
     scrollBehavior: () => ({ top: 0 })
 })
 
-router.beforeEach(async (to, from, next) => {
-    const { useAuthStore } = await import('@/stores/auth')
-    const auth = useAuthStore()
-
-    // Check token in localStorage directly - store may not be hydrated yet
+router.beforeEach((to, from, next) => {
+    // Read directly from localStorage - always synchronous and reliable
     const hasToken = !!localStorage.getItem('token')
 
-    if (to.meta.requiresAuth) {
-        if (!hasToken) return next('/login')
-        return next()
-    }
-
-    if (to.meta.guest && hasToken) return next('/')
+    if (to.meta.requiresAuth && !hasToken) return next('/login')
+    if (to.meta.guest && hasToken)         return next('/')
 
     next()
 })

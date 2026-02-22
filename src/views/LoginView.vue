@@ -110,7 +110,7 @@ const form      = ref({ email: '', password: '' })
 async function handleLogin() {
   error.value = ''
   const result = await authStore.login(form.value.email, form.value.password)
-  if (result.success) router.push('/')
+  if (result.success) router.replace('/')
   else error.value = result.message
 }
 </script>

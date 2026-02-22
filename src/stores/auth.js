@@ -3,8 +3,9 @@ import { ref, computed } from 'vue'
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
-    const user    = ref(null)
+    // Read token synchronously on store creation
     const token   = ref(localStorage.getItem('token') || null)
+    const user    = ref(null)
     const loading = ref(false)
 
     const isLoggedIn = computed(() => !!token.value)
@@ -13,9 +14,11 @@ export const useAuthStore = defineStore('auth', () => {
         loading.value = true
         try {
             const res = await apiLogin({ email, password })
-            token.value = res.data.data.token
-            user.value  = res.data.data.user
-            localStorage.setItem('token', res.data.data.token)
+            const t = res.data.data.token
+            const u = res.data.data.user
+            token.value = t
+            user.value  = u
+            localStorage.setItem('token', t)
             return { success: true }
         } catch (e) {
             return { success: false, message: e.response?.data?.error || 'Login failed' }
@@ -47,8 +50,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     function logout() {
-        user.value  = null
         token.value = null
+        user.value  = null
         localStorage.removeItem('token')
     }
 
