@@ -44,8 +44,12 @@ export const useAuthStore = defineStore('auth', () => {
             const res = await getCurrentUser()
             user.value = res.data.data
         } catch (e) {
-            // DO NOT logout here - a failed profile fetch should not kill the session
-            console.warn('Could not fetch user profile:', e.message)
+            if (e.response?.status === 401) {
+                // Token is invalid — clean up and redirect
+                logout()
+            } else {
+                console.warn('Could not fetch user profile:', e.message)
+            }
         }
     }
 

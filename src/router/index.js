@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
     {
@@ -32,20 +33,17 @@ const router = createRouter({
     scrollBehavior: () => ({ top: 0 })
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const hasToken = !!localStorage.getItem('token')
 
-    // Route needs auth and user has no token → send to login
     if (to.meta.requiresAuth && !hasToken) {
         return next({ name: 'Login' })
     }
 
-    // Route is guest-only and user IS logged in → send to dashboard
     if (to.meta.guest && hasToken) {
         return next({ name: 'Dashboard' })
     }
 
-    // All good
     next()
 })
 

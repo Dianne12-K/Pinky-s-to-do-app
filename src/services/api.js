@@ -8,17 +8,20 @@ const api = axios.create({
 })
 
 // Request interceptor — attach token
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token')
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Clear the bad token
+            localStorage.removeItem('token')
+            // Redirect to login if not already there
+            if (router.currentRoute.value.name !== 'Login') {
+                router.push({ name: 'Login' })
+            }
         }
-        return config
-    },
-    (error) => Promise.reject(error)
+        return Promise.reject(error)
+    }
 )
-
 // Response interceptor — DO NOT auto-logout on 401
 // Let each store/component decide what to do with errors
 api.interceptors.response.use(
