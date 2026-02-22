@@ -26,8 +26,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token')
-            // window.location.href = '/login'
+            const url = error.config.url
+            // Only clear token + redirect if it's not a login/register attempt
+            if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
+                localStorage.removeItem('token')
+                window.location.href = '/login'
+            }
         }
         return Promise.reject(error)
     }
@@ -39,18 +43,18 @@ export const register       = (userData)    => api.post('/auth/register', userDa
 export const getCurrentUser = ()            => api.get('/auth/me')
 
 // ─── Tasks ────────────────────────────────────────────────────────────────
-export const getTasks    = (params)       => api.get('/tasks/', { params })
-export const getTask     = (id)           => api.get(`/tasks/${id}`)
-export const createTask  = (data)         => api.post('/tasks/', data)
-export const updateTask  = (id, data)     => api.put(`/tasks/${id}`, data)
-export const deleteTask  = (id)           => api.delete(`/tasks/${id}`)
-export const completeTask = (id)          => api.patch(`/tasks/${id}/complete`)
+export const getTasks     = (params)       => api.get('/tasks/', { params })
+export const getTask      = (id)           => api.get(`/tasks/${id}`)
+export const createTask   = (data)         => api.post('/tasks/', data)
+export const updateTask   = (id, data)     => api.put(`/tasks/${id}`, data)
+export const deleteTask   = (id)           => api.delete(`/tasks/${id}`)
+export const completeTask = (id)           => api.patch(`/tasks/${id}/complete`)
 
 // ─── Reminders ────────────────────────────────────────────────────────────
-export const getReminders    = (taskId)              => api.get(`/tasks/${taskId}/reminders`)
-export const createReminder  = (taskId, data)        => api.post(`/tasks/${taskId}/reminders`, data)
-export const deleteReminder  = (taskId, remId)       => api.delete(`/tasks/${taskId}/reminders/${remId}`)
-export const snoozeReminder  = (taskId, remId, mins) => api.patch(`/tasks/${taskId}/reminders/${remId}/snooze`, { minutes: mins })
+export const getReminders   = (taskId)              => api.get(`/tasks/${taskId}/reminders`)
+export const createReminder = (taskId, data)        => api.post(`/tasks/${taskId}/reminders`, data)
+export const deleteReminder = (taskId, remId)       => api.delete(`/tasks/${taskId}/reminders/${remId}`)
+export const snoozeReminder = (taskId, remId, mins) => api.patch(`/tasks/${taskId}/reminders/${remId}/snooze`, { minutes: mins })
 
 // ─── Notes ────────────────────────────────────────────────────────────────
 export const getNotes   = (params)     => api.get('/notes/', { params })
