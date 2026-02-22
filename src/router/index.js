@@ -18,13 +18,12 @@ const routes = [
         component: () => import('@/layouts/AppLayout.vue'),
         meta: { requiresAuth: true },
         children: [
-            { path: '',         name: 'Dashboard', component: () => import('@/views/DashboardView.vue') },
-            { path: 'tasks',    name: 'Tasks',     component: () => import('@/views/TasksView.vue') },
-            { path: 'reminders',name: 'Reminders', component: () => import('@/views/RemindersView.vue') },
-            { path: 'notes',    name: 'Notes',     component: () => import('@/views/NotesView.vue') },
+            { path: '',          name: 'Dashboard', component: () => import('@/views/DashboardView.vue') },
+            { path: 'tasks',     name: 'Tasks',     component: () => import('@/views/TasksView.vue') },
+            { path: 'reminders', name: 'Reminders', component: () => import('@/views/RemindersView.vue') },
+            { path: 'notes',     name: 'Notes',     component: () => import('@/views/NotesView.vue') },
         ]
-    },
-    { path: '/:pathMatch(.*)*', redirect: '/' }
+    }
 ]
 
 const router = createRouter({
@@ -34,12 +33,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    // Read directly from localStorage - always synchronous and reliable
     const hasToken = !!localStorage.getItem('token')
 
-    if (to.meta.requiresAuth && !hasToken) return next('/login')
-    if (to.meta.guest && hasToken)         return next('/')
+    // Route needs auth and user has no token → send to login
+    if (to.meta.requiresAuth && !hasToken) {
+        return next({ name: 'Login' })
+    }
 
+    // Route is guest-only and user IS logged in → send to dashboard
+    if (to.meta.guest && hasToken) {
+        return next({ name: 'Dashboard' })
+    }
+
+    // All good
     next()
 })
 
