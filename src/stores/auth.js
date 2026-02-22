@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
-    // Read token synchronously on store creation
     const token   = ref(localStorage.getItem('token') || null)
     const user    = ref(null)
     const loading = ref(false)
@@ -44,8 +43,9 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const res = await getCurrentUser()
             user.value = res.data.data
-        } catch {
-            logout()
+        } catch (e) {
+            // DO NOT logout here - a failed profile fetch should not kill the session
+            console.warn('Could not fetch user profile:', e.message)
         }
     }
 

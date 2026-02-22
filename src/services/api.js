@@ -7,7 +7,7 @@ const api = axios.create({
     }
 })
 
-// Request interceptor to add token
+// Request interceptor — attach token
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token')
@@ -16,25 +16,14 @@ api.interceptors.request.use(
         }
         return config
     },
-    (error) => {
-        return Promise.reject(error)
-    }
+    (error) => Promise.reject(error)
 )
 
-// Response interceptor to handle errors
+// Response interceptor — DO NOT auto-logout on 401
+// Let each store/component decide what to do with errors
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            const url = error.config.url
-            // Only clear token + redirect if it's not a login/register attempt
-            if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
-                localStorage.removeItem('token')
-                window.location.href = '/login'
-            }
-        }
-        return Promise.reject(error)
-    }
+    (error) => Promise.reject(error)
 )
 
 // ─── Auth ─────────────────────────────────────────────────────────────────
