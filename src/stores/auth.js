@@ -13,11 +13,19 @@ export const useAuthStore = defineStore('auth', () => {
         loading.value = true
         try {
             const res = await apiLogin({ email, password })
+
+            // Use the nested data structure from your backend
             const t = res.data.data.token
             const u = res.data.data.user
-            token.value = t
-            user.value  = u
+
+            // 1. Update localStorage FIRST
             localStorage.setItem('token', t)
+
+            // 2. Update the reactive state
+            token.value = t
+            console.log('✅ Token saved:', t)
+            user.value  = u
+
             return { success: true }
         } catch (e) {
             return { success: false, message: e.response?.data?.error || 'Login failed' }
@@ -44,15 +52,10 @@ export const useAuthStore = defineStore('auth', () => {
             const res = await getCurrentUser()
             user.value = res.data.data
         } catch (e) {
-            if (e.response?.status === 401) {
-                // Token is invalid — clean up and redirect
-                logout()
-            } else {
-                console.warn('Could not fetch user profile:', e.message)
-            }
+            // do nothing - don't logout on failed profile fetch
+            console.warn('Could not fetch user:', e.message)
         }
     }
-
     function logout() {
         token.value = null
         user.value  = null

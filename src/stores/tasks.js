@@ -22,11 +22,15 @@ export const useTasksStore = defineStore('tasks', () => {
             const res = await getTasks({ per_page: 100, ...params })
             tasks.value = res.data.data?.tasks || res.data.data || []
             total.value = res.data.data?.total || tasks.value.length
+        } catch (error) {
+            console.error("Failed to fetch tasks:", error)
+            // If it's a 401, the interceptor will handle the logout,
+            // but this catch prevents the UI from crashing.
+            tasks.value = []
         } finally {
             loading.value = false
         }
     }
-
     async function createTask(data) {
         const res = await apiCreate(data)
         const newTask = res.data.data

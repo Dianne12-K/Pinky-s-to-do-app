@@ -155,6 +155,18 @@ const userInitial = computed(() => authStore.user?.username?.[0]?.toUpperCase() 
 function handleLogout() { authStore.logout(); router.push('/login') }
 function onResize()     { isMobile.value = window.innerWidth < 768 }
 
-onMounted(() => { window.addEventListener('resize', onResize); tasksStore.fetchTasks() })
+// Remove BOTH onMounted calls and replace with this single one:
+onMounted(async () => {
+  window.addEventListener('resize', onResize)
+  onUnmounted(() => window.removeEventListener('resize', onResize))
+
+  if (!authStore.user) {
+    await authStore.fetchUser()
+  }
+
+  if (authStore.token) {
+    await tasksStore.fetchTasks()
+  }
+})
 onUnmounted(() => window.removeEventListener('resize', onResize))
 </script>
